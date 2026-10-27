@@ -16,7 +16,7 @@ const firebaseConfig = {
   appId: "1:146128884733:web:b9d10659c8ec6a7046bf94",
   measurementId: "G-GPL520L8LL"
 };
-const DOMINIO = "@alunos.epbjc.pt";
+const DOMINIO = "AEBJC.onmicrosoft.com";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
