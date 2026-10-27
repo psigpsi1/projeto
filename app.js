@@ -38,6 +38,7 @@ function mensagem(texto, tipo = "") {
 }
 
 // ===== Login / logout =====
+// ===== Login / logout =====
 $("btnEntrar").addEventListener("click", async () => {
   mensagem("");
   try {
@@ -45,26 +46,6 @@ $("btnEntrar").addEventListener("click", async () => {
   } catch (e) {
     console.error(e);
     mensagem("Não foi possível iniciar sessão (" + (e.code || "erro") + "). Verifica se os popups estão permitidos.", "erro");
-  }
-  // Exemplo de verificação logo após o login:
-  // Exemplo no evento de login do app.js
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const emailUser = result.user.email.toLowerCase();
-
-    // Consulta direta ao Firestore para verificar a whitelist
-    const docRef = doc(db, "authorized-users", emailUser);
-    const docSnap = await getDoc(docRef);
-
-    if (!docSnap.exists() || docSnap.data().active !== true) {
-      await signOut(auth);
-      alert("Acesso negado: Este email não está autorizado.");
-      return;
-    }
-
-    console.log("Utilizador autorizado com sucesso!");
-  } catch (e) {
-    console.error(e);
   }
 });
 $("btnSair").addEventListener("click", () => signOut(auth));
