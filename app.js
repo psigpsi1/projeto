@@ -40,32 +40,29 @@ function mensagem(texto, tipo = "") {
 // ===== Login / logout =====
 $("btnEntrar").addEventListener("click", async () => {
   mensagem("");
-  /*try {
+  try {
     await signInWithPopup(auth, provider);
   } catch (e) {
     console.error(e);
     mensagem("Não foi possível iniciar sessão (" + (e.code || "erro") + "). Verifica se os popups estão permitidos.", "erro");
-  }*/
+  }
   // Exemplo de verificação logo após o login:
+  // Exemplo no evento de login do app.js
   try {
     const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    const emailUser = user.email.toLowerCase();
+    const emailUser = result.user.email.toLowerCase();
 
-    // Verificar se o email existe na coleção authorized-users do Firestore
+    // Consulta direta ao Firestore para verificar a whitelist
     const docRef = doc(db, "authorized-users", emailUser);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists() || docSnap.data().active !== true) {
-      // Se não estiver na whitelist ou não estiver ativo, faz logout imediato
       await signOut(auth);
-      alert("Acesso negado: Este email não está autorizado na whitelist.");
+      alert("Acesso negado: Este email não está autorizado.");
       return;
     }
 
-    // Se estiver tudo bem, prossegue para a aplicação
-    console.log("Login autorizado com sucesso!");
-
+    console.log("Utilizador autorizado com sucesso!");
   } catch (e) {
     console.error(e);
   }
