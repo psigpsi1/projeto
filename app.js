@@ -40,12 +40,12 @@ function mensagem(texto, tipo = "") {
 // ===== Login / logout =====
 $("btnEntrar").addEventListener("click", async () => {
   mensagem("");
-  try {
+  /*try {
     await signInWithPopup(auth, provider);
   } catch (e) {
     console.error(e);
     mensagem("Não foi possível iniciar sessão (" + (e.code || "erro") + "). Verifica se os popups estão permitidos.", "erro");
-  }
+  }*/
   // Exemplo de verificação logo após o login:
   try {
     const result = await signInWithPopup(auth, provider);
