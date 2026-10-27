@@ -23,7 +23,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const provider = new OAuthProvider("microsoft.com");
-provider.setCustomParameters({ prompt: "select_account" });
+provider.setCustomParameters({
+  tenant: "d0838b51-f9ed-476c-940f-c6805b442e47",
+  prompt: "select_account"
+});
 
 const $ = (id) => document.getElementById(id);
 
