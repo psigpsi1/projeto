@@ -24,7 +24,7 @@ const db = getFirestore(app);
 
 const provider = new OAuthProvider("microsoft.com");
 provider.setCustomParameters({
-  tenant: "d0838b51-f9ed-476c-940f-c6805b442e47",
+  tenant: "4334e4b0-48f4-4a76-ae54-cec847437a72",
   prompt: "select_account"
 });
 
