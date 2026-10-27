@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Requisição de Equipamentos | EPBJC</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div>
+      <h1>Requisição de equipamentos</h1>
+      <p class="sub">Escola Profissional Bento de Jesus Caraça</p>
+    </div>
+    <div id="sessao" hidden>
+      <span id="nome"></span>
+      <button id="btnSair" class="btn-sec">Terminar sessão</button>
+    </div>
+  </header>
+
+  <main>
+    <p id="msg" role="status" hidden></p>
+
+    <section id="login">
+      <h2>Entrar</h2>
+      <p>Usa a tua conta institucional (@alunos.epbjc.pt) para fazer e acompanhar pedidos.</p>
+      <button id="btnEntrar">Entrar com Microsoft</button>
+    </section>
+
+    <div id="area" hidden>
+      <section>
+        <h2>Novo pedido</h2>
+        <form id="formPedido" novalidate>
+          <label>Equipamento
+            <select id="equipamento" required>
+              <option value="">Escolhe…</option>
+              <option>Portátil01</option><option>Portátil02</option>
+              <option>Tablet01</option><option>Tablet02</option>
+              <option>Projetor01</option>
+            </select>
+          </label>
+          <label>Data do pedido
+            <input type="date" id="dataPedido" required />
+          </label>
+          <label>Devolução prevista
+            <input type="date" id="devolucao" required />
+          </label>
+          <label>Observações (opcional)
+            <textarea id="obs" maxlength="500" rows="3"></textarea>
+          </label>
+          <button type="submit">Enviar pedido</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Os meus pedidos</h2>
+        <div class="tabela">
+          <table>
+            <thead><tr><th>Código</th><th>Equipamento</th><th>Pedido</th><th>Devolução</th><th>Estado</th></tr></thead>
+            <tbody id="lista"></tbody>
+          </table>
+        </div>
+        <p id="vazio" hidden>Ainda não fizeste nenhum pedido.</p>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+:root{
+  --fundo:#f3f6fa; --papel:#fff; --texto:#14212e; --suave:#5a6b7b;
+  --azul:#0b4f8a; --azul-esc:#083a67; --linha:#d5dee8;
+  --ok:#1b7a43; --aviso:#9a6200; --erro:#b3261e;
+  font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--fundo:#0f1720;--papel:#18222e;--texto:#e8eef4;--suave:#9fb0c0;--azul:#4a9be0;--azul-esc:#7ab6ea;--linha:#2b3a4a;--ok:#5fd08a;--aviso:#e8b04a;--erro:#ff8a80}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fundo);color:var(--texto);line-height:1.5}
+.topo{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;
+  padding:1rem 1.5rem;background:var(--papel);border-bottom:3px solid var(--azul)}
+h1{margin:0;font-size:1.3rem} h2{margin:0 0 .75rem;font-size:1.1rem}
+.sub{margin:0;color:var(--suave);font-size:.9rem}
+main{max-width:860px;margin:1.5rem auto;padding:0 1rem;display:grid;gap:1.25rem}
+section{background:var(--papel);border:1px solid var(--linha);border-radius:8px;padding:1.25rem}
+form{display:grid;gap:.9rem;max-width:480px}
+label{display:grid;gap:.3rem;font-size:.9rem;color:var(--suave)}
+input,select,textarea{font:inherit;padding:.55rem;border:1px solid var(--linha);border-radius:6px;background:var(--fundo);color:var(--texto)}
+button{font:inherit;font-weight:600;padding:.6rem 1.1rem;border:0;border-radius:6px;background:var(--azul);color:#fff;cursor:pointer;justify-self:start}
+button:hover{background:var(--azul-esc)}
+button:disabled{opacity:.6;cursor:wait}
+.btn-sec{background:transparent;color:var(--azul);border:1px solid var(--azul)}
+.btn-sec:hover{background:var(--fundo)}
+:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+#sessao{display:flex;gap:.75rem;align-items:center;font-size:.9rem}
+#msg{margin:0;padding:.7rem 1rem;border-radius:6px;border:1px solid var(--linha);background:var(--papel)}
+#msg.erro{border-color:var(--erro);color:var(--erro)} #msg.ok{border-color:var(--ok);color:var(--ok)}
+.tabela{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--linha);white-space:nowrap}
+.estado{font-weight:600}
+.Pendente{color:var(--aviso)} .Em\ empréstimo{color:var(--azul)} .Devolvido{color:var(--ok)} .Recusado{color:var(--erro)}
+[hidden]{display:none!important}
