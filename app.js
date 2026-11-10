@@ -88,13 +88,6 @@ onAuthStateChanged(auth, async (user) => {
   carregarPedidos(user);
 });
 
-function mostrarEcra(autenticado) {
-  $("ecra-login").hidden = autenticado;
-  $("ecra-app").hidden = !autenticado;
-  $("sessao").hidden = !autenticado;
-  if (autenticado) mostrarMensagem("");
-}
-
 // ---------- CRIAR REQUISIÇÃO ----------
 function gerarCodigo() {
   const d = new Date().toISOString().slice(0, 10).replaceAll("-", "");
