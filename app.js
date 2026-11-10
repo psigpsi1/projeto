@@ -57,7 +57,6 @@ $("btn-entrar").addEventListener("click", async () => {
 
 $("btn-sair").addEventListener("click", () => signOut(auth));
 
-// Corre sempre que o estado de autenticação muda
 onAuthStateChanged(auth, async (user) => {
   if (!user) return mostrarEcra(false);
 
