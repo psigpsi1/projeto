@@ -1,12 +1,12 @@
-// ===== Firebase (módulos ES via CDN) =====
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, OAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+import {
+  getAuth, OAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
-// TODO: copia aqui o firebaseConfig do TEU projeto (Project settings → Your apps → Web app).
-// Este objeto pode ser público; NUNCA coloques Client Secret nem service-account.json.
+// Configuração do projeto Firebase (pode ser pública)
 const firebaseConfig = {
   apiKey: "AIzaSyBZ0jChLiVJwYxSCJ9Bnqz-6dmT-xHMfdE",
   authDomain: "epbjc-749d4.firebaseapp.com",
@@ -16,121 +16,148 @@ const firebaseConfig = {
   appId: "1:146128884733:web:b9d10659c8ec6a7046bf94",
   measurementId: "G-GPL520L8LL"
 };
-const DOMINIO = "AEBJC.onmicrosoft.com";
+
+const DOMINIO = "alunos.epbjc.pt";
+
+// 2) Directory (tenant) ID da app no Microsoft Entra ID (pedir à professora; não é um segredo)
+const TENANT_ID = "4334e4b0-48f4-4a76-ae54-cec847437a72";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const provider = new OAuthProvider("microsoft.com");
-provider.setCustomParameters({
-  tenant: "4334e4b0-48f4-4a76-ae54-cec847437a72",
-  prompt: "select_account"
-});
-
+// Atalho para ir buscar elementos da página
 const $ = (id) => document.getElementById(id);
 
-function mensagem(texto, tipo = "") {
-  const m = $("msg");
+function mostrarMensagem(texto, tipo = "") {
+  const m = $("mensagem");
   m.textContent = texto;
   m.className = tipo;
   m.hidden = !texto;
 }
 
-// ===== Login / logout =====
-// ===== Login / logout =====
-$("btnEntrar").addEventListener("click", async () => {
-  mensagem("");
+// ---------- LOGIN / LOGOUT ----------
+$("btn-entrar").addEventListener("click", async () => {
+  mostrarMensagem("");
+  const provider = new OAuthProvider("microsoft.com");
+  const parametros = { prompt: "select_account" };
+  // A app é single-tenant: o login tem de apontar ao tenant da escola, não ao /common
+  if (!TENANT_ID.startsWith("COLA_AQUI")) parametros.tenant = TENANT_ID;
+  provider.setCustomParameters(parametros);
   try {
     await signInWithPopup(auth, provider);
   } catch (e) {
     console.error(e);
-    mensagem("Não foi possível iniciar sessão (" + (e.code || "erro") + "). Verifica se os popups estão permitidos.", "erro");
+    mostrarMensagem("Não foi possível iniciar sessão (" + e.code + ").", "erro");
   }
 });
-$("btnSair").addEventListener("click", () => signOut(auth));
 
-// ===== Estado de autenticação =====
+$("btn-sair").addEventListener("click", () => signOut(auth));
+
+// Corre sempre que o estado de autenticação muda
 onAuthStateChanged(auth, async (user) => {
-  const email = user?.email?.toLowerCase() ?? "";
-  if (user && !email.endsWith(DOMINIO)) {
-    await signOut(auth);
-    mensagem("Usa a conta institucional " + DOMINIO, "erro");
-    return;
+  if (!user) return mostrarEcra(false);
+
+  const email = (user.email || "").toLowerCase();
+
+  // Verificação 1: domínio institucional
+  if (!email.endsWith("@" + DOMINIO)) {
+    mostrarMensagem("Usa a conta @" + DOMINIO + ".", "erro");
+    return signOut(auth);
   }
-  $("login").hidden = !!user;
-  $("area").hidden = !user;
-  $("sessao").hidden = !user;
-  if (user) {
-    $("nome").textContent = user.displayName || email;
-    $("dataPedido").value = new Date().toISOString().slice(0, 10);
-    carregarPedidos(user);
-  } else {
-    $("lista").innerHTML = "";
+  // Verificação 2: whitelist (documento authorizedUsers/<email> com active == true)
+  try {
+    const snap = await getDoc(doc(db, "authorizedUsers", email));
+    if (!snap.exists() || snap.data().active !== true) {
+      mostrarMensagem("A conta " + email + " não está autorizada.", "erro");
+      return signOut(auth);
+    }
+  } catch (e) {
+    console.error(e);
+    mostrarMensagem("Erro ao verificar autorização (" + e.code + ").", "erro");
+    return signOut(auth);
   }
+
+  $("nome-utilizador").textContent = user.displayName || email;
+  mostrarEcra(true);
+  carregarPedidos(user);
 });
 
-// ===== Criar pedido =====
-$("formPedido").addEventListener("submit", async (ev) => {
+function mostrarEcra(autenticado) {
+  $("ecra-login").hidden = autenticado;
+  $("ecra-app").hidden = !autenticado;
+  $("sessao").hidden = !autenticado;
+  if (autenticado) mostrarMensagem("");
+}
+
+// ---------- CRIAR REQUISIÇÃO ----------
+function gerarCodigo() {
+  const d = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+  const r = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `REQ-${d}-${r}`;
+}
+
+$("form-requisicao").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const user = auth.currentUser;
-  if (!user) return;
-  const equipamento = $("equipamento").value;
   const dataPedido = $("dataPedido").value;
-  const devolucao = $("devolucao").value;
+  const devolucaoPrevista = $("devolucaoPrevista").value;
 
-  if (!equipamento || !dataPedido || !devolucao) return mensagem("Preenche todos os campos obrigatórios.", "erro");
-  if (devolucao < dataPedido) return mensagem("A devolução não pode ser anterior à data do pedido.", "erro");
+  if (devolucaoPrevista < dataPedido) {
+    return mostrarMensagem("A devolução tem de ser igual ou posterior à data do pedido.", "erro");
+  }
 
-  const codigo = "REQ-" + dataPedido.replaceAll("-", "") + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
-  const btn = ev.submitter; btn.disabled = true;
+  const botao = ev.submitter;
+  botao.disabled = true;
   try {
     await addDoc(collection(db, "requisicoes"), {
-      codigo,
+      codigo: gerarCodigo(),
       uid: user.uid,
       requisitante: user.displayName || "",
       email: user.email.toLowerCase(),
-      equipamento,
+      equipamento: $("equipamento").value,
       dataPedido,
-      devolucaoPrevista: devolucao,
+      devolucaoPrevista,
       estado: "Pendente",
-      observacoes: $("obs").value.trim().slice(0, 500),
+      observacoes: $("observacoes").value.trim(),
       criadoEm: serverTimestamp()
     });
     ev.target.reset();
-    $("dataPedido").value = new Date().toISOString().slice(0, 10);
-    mensagem("Pedido " + codigo + " enviado.", "ok");
+    mostrarMensagem("Requisição enviada. Estado: Pendente.", "ok");
     carregarPedidos(user);
   } catch (e) {
     console.error(e);
-    mensagem("Não foi possível enviar o pedido (" + (e.code || "erro") + ").", "erro");
+    mostrarMensagem("Não foi possível enviar (" + e.code + ").", "erro");
   } finally {
-    btn.disabled = false;
+    botao.disabled = false;
   }
 });
 
-// ===== Listar os meus pedidos (query filtrada por uid, exigida pelas regras) =====
+// ---------- LER OS MEUS PEDIDOS ----------
 async function carregarPedidos(user) {
+  const corpo = $("corpo-tabela");
+  corpo.replaceChildren();
   try {
+    // O filtro por uid é obrigatório: as regras só deixam ler pedidos próprios
     const q = query(collection(db, "requisicoes"), where("uid", "==", user.uid));
-    const snap = await getDocs(q);
-    const pedidos = snap.docs.map((d) => d.data())
-      .sort((a, b) => (b.criadoEm?.seconds ?? 0) - (a.criadoEm?.seconds ?? 0)); // ordena no cliente: evita criar índice composto
-    const corpo = $("lista");
-    corpo.innerHTML = "";
+    const res = await getDocs(q);
+    const pedidos = res.docs.map((d) => d.data())
+      .sort((a, b) => (b.dataPedido || "").localeCompare(a.dataPedido || ""));
+
     $("vazio").hidden = pedidos.length > 0;
+    $("tabela").hidden = pedidos.length === 0;
+
     for (const p of pedidos) {
       const tr = document.createElement("tr");
-      [p.codigo, p.equipamento, p.dataPedido, p.devolucaoPrevista, p.estado].forEach((v, i) => {
+      for (const valor of [p.codigo, p.equipamento, p.dataPedido, p.devolucaoPrevista, p.estado]) {
         const td = document.createElement("td");
-        td.textContent = v ?? "";               // textContent evita injeção de HTML
-        if (i === 4) td.className = "estado " + v;
+        td.textContent = valor ?? "";   // textContent evita injeção de HTML
         tr.appendChild(td);
-      });
+      }
       corpo.appendChild(tr);
     }
   } catch (e) {
     console.error(e);
-    mensagem("Não foi possível carregar os pedidos (" + (e.code || "erro") + ").", "erro");
+    mostrarMensagem("Não foi possível carregar os pedidos (" + e.code + ").", "erro");
   }
 }

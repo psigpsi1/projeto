@@ -7,18 +7,20 @@ service cloud.firestore {
     function ehAdmin() {
       return logado() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
-    // Utilizador na whitelist (authorizedUsers) e ativo
-    function autorizado() {
-      return logado()
-        && request.auth.token.email_verified == true
-        && mail().matches('.*@alunos[.]epbjc[.]pt')
-        && exists(/databases/$(database)/documents/authorizedUsers/$(mail()))
-        && get(/databases/$(database)/documents/authorizedUsers/$(mail())).data.active == true;
+    
+    // Permitir que o próprio utilizador leia o seu registo na whitelist para validação
+    match /authorized-users/{id} {
+      allow read: if logado() && id == mail();
+      allow write: if false;
     }
 
-    // Só o Admin SDK (script de importação) escreve aqui
-    match /authorizedUsers/{id} { allow read, write: if false; }
-    match /admins/{id}          { allow read, write: if false; }
+    match /admins/{id} { allow read, write: if false; }
+
+    function autorizado() {
+      return logado()
+        && exists(/databases/$(database)/documents/authorized-users/$(mail()))
+        && get(/databases/$(database)/documents/authorized-users/$(mail())).data.active == true;
+    }
 
     match /requisicoes/{id} {
       allow read: if ehAdmin() || (autorizado() && resource.data.uid == request.auth.uid);

@@ -3,39 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Requisição de Equipamentos | EPBJC</title>
+  <title>Requisição de Equipamentos · EPBJC</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="topo">
-    <div>
-      <h1>Requisição de equipamentos</h1>
-      <p class="sub">Escola Profissional Bento de Jesus Caraça</p>
-    </div>
+    <h1>Requisição de Equipamentos</h1>
     <div id="sessao" hidden>
-      <span id="nome"></span>
-      <button id="btnSair" class="btn-sec">Terminar sessão</button>
+      <span id="nome-utilizador"></span>
+      <button id="btn-sair" class="secundario">Terminar sessão</button>
     </div>
   </header>
 
   <main>
-    <p id="msg" role="status" hidden></p>
+    <p id="mensagem" role="status" hidden></p>
 
-    <section id="login">
+    <!-- Ecrã de login -->
+    <section id="ecra-login" class="cartao">
       <h2>Entrar</h2>
-      <p>Usa a tua conta institucional (@alunos.epbjc.pt) para fazer e acompanhar pedidos.</p>
-      <button id="btnEntrar">Entrar com Microsoft</button>
+      <p>Usa a tua conta institucional @alunos.epbjc.pt.</p>
+      <button id="btn-entrar">Entrar com Microsoft</button>
     </section>
 
-    <div id="area" hidden>
-      <section>
-        <h2>Novo pedido</h2>
-        <form id="formPedido" novalidate>
+    <!-- Área da aplicação (só visível após login autorizado) -->
+    <div id="ecra-app" hidden>
+      <section class="cartao">
+        <h2>Nova requisição</h2>
+        <form id="form-requisicao">
           <label>Equipamento
             <select id="equipamento" required>
               <option value="">Escolhe…</option>
-              <option>Portátil01</option><option>Portátil02</option>
-              <option>Tablet01</option><option>Tablet02</option>
+              <option>Portátil01</option>
+              <option>Portátil02</option>
+              <option>Tablet01</option>
+              <option>Tablet02</option>
               <option>Projetor01</option>
             </select>
           </label>
@@ -43,24 +44,26 @@
             <input type="date" id="dataPedido" required />
           </label>
           <label>Devolução prevista
-            <input type="date" id="devolucao" required />
+            <input type="date" id="devolucaoPrevista" required />
           </label>
           <label>Observações (opcional)
-            <textarea id="obs" maxlength="500" rows="3"></textarea>
+            <textarea id="observacoes" maxlength="500" rows="3"></textarea>
           </label>
-          <button type="submit">Enviar pedido</button>
+          <button type="submit">Enviar requisição</button>
         </form>
       </section>
 
-      <section>
+      <section class="cartao">
         <h2>Os meus pedidos</h2>
-        <div class="tabela">
-          <table>
-            <thead><tr><th>Código</th><th>Equipamento</th><th>Pedido</th><th>Devolução</th><th>Estado</th></tr></thead>
-            <tbody id="lista"></tbody>
+        <p id="vazio" hidden>Ainda não fizeste nenhuma requisição.</p>
+        <div class="tabela-scroll">
+          <table id="tabela" hidden>
+            <thead>
+              <tr><th>Código</th><th>Equipamento</th><th>Pedido</th><th>Devolução</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="corpo-tabela"></tbody>
           </table>
         </div>
-        <p id="vazio" hidden>Ainda não fizeste nenhum pedido.</p>
       </section>
     </div>
   </main>
