@@ -70,7 +70,7 @@ onAuthStateChanged(auth, async (user) => {
   }
   // Verificação 2: whitelist (documento authorizedUsers/<email> com active == true)
   try {
-    const snap = await getDoc(doc(db, "authorizedUsers", email));
+    const snap = await getDoc(doc(db, "authorized-users", email));
     if (!snap.exists() || snap.data().active !== true) {
       mostrarMensagem("A conta " + email + " não está autorizada.", "erro");
       return signOut(auth);
