@@ -1,10 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-import {
-  getAuth, OAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+import { 
+  getAuth, OAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-import {
-  getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp
+import { 
+  getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
 
 // Configuração do projeto Firebase (pode ser pública)
 const firebaseConfig = {
