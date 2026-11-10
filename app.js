@@ -61,6 +61,7 @@ $("btn-sair").addEventListener("click", () => signOut(auth));
 onAuthStateChanged(auth, async (user) => {
   if (!user) return mostrarEcra(false);
 
+  // Força o e-mail a ficar estritamente em minúsculas
   const email = (user.email || "").toLowerCase();
 
   // Verificação 1: domínio institucional
@@ -68,9 +69,10 @@ onAuthStateChanged(auth, async (user) => {
     mostrarMensagem("Usa a conta @" + DOMINIO + ".", "erro");
     return signOut(auth);
   }
-  // Verificação 2: whitelist (documento authorizedUsers/<email> com active == true)
+
+  // Verificação 2: whitelist (documento authorized-users/<email> com active == true)
   try {
-    const snap = await getDoc(doc(db, "authorized-users", email));
+    const snap = comarca = await getDoc(doc(db, "authorized-users", email));
     if (!snap.exists() || snap.data().active !== true) {
       mostrarMensagem("A conta " + email + " não está autorizada.", "erro");
       return signOut(auth);
