@@ -70,17 +70,20 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   // Verificação 2: whitelist (documento authorized-users/<email> com active == true)
-  try {
-    const snap = comarca = await getDoc(doc(db, "authorized-users", email));
-    if (!snap.exists() || snap.data().active !== true) {
-      mostrarMensagem("A conta " + email + " não está autorizada.", "erro");
-      return signOut(auth);
-    }
-  } catch (e) {
-    console.error(e);
-    mostrarMensagem("Erro ao verificar autorização (" + e.code + ").", "erro");
+// Verificação 2: whitelist (documento authorized-users/<email> com active == true)
+try {
+  const snap = await getDoc(doc(db, "authorized-users", email));
+  if (!snap.exists() || snap.data().active !== true) {
+    mostrarMensagem("A conta " + email + " não está autorizada.", "erro");
     return signOut(auth);
   }
+} catch (e) {
+  console.error(e);
+  // Mostra a mensagem do erro ou o código, evitando o "undefined"
+  const detalhe = e.code || e.message || "desconhecido";
+  mostrarMensagem("Erro ao verificar autorização (" + detalhe + ").", "erro");
+  return signOut(auth);
+}
 
   $("nome-utilizador").textContent = user.displayName || email;
   mostrarEcra(true);
